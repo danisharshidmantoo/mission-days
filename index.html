@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Mission Days has moved</title>
+  <meta name="description" content="Mission Days now lives at mission-days.pages.dev.">
+  <meta name="theme-color" content="#000000">
+  <meta name="color-scheme" content="dark">
+  <link rel="canonical" href="https://mission-days.pages.dev/">
+  <style>
+    :root { --lime: #D4FF40; --fg: #fff; --muted: rgb(255 255 255 / .6); }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: #000; color: var(--fg); font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, "Segoe UI", Roboto, sans-serif; -webkit-font-smoothing: antialiased; }
+    main { max-width: 460px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 56px) 20px 40px; }
+    .label { font: 700 11px/1 -apple-system, system-ui, sans-serif; letter-spacing: .24em; text-transform: uppercase; color: var(--lime); }
+    h1 { margin: 10px 0 0; font: 700 40px/1.05 ui-monospace, "SF Mono", Menlo, Consolas, monospace; letter-spacing: -.02em; color: var(--lime); }
+    p { font-size: 16px; line-height: 1.5; color: var(--muted); }
+    .card { margin-top: 22px; padding: 18px; border: 1px solid rgb(255 255 255 / .08); border-radius: 8px; background: rgb(20 20 20); }
+    .card p { margin: 6px 0 0; }
+    .card b { color: var(--fg); }
+    .btn { display: block; width: 100%; margin-top: 14px; padding: 15px; border: 0; border-radius: 8px; font: 700 17px -apple-system, system-ui, sans-serif; text-align: center; text-decoration: none; cursor: pointer; }
+    .primary { background: var(--lime); color: #000; }
+    .secondary { background: rgb(255 255 255 / .08); color: var(--lime); }
+    .url { font: 600 15px ui-monospace, "SF Mono", Menlo, monospace; color: var(--lime); }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="label">Mission Days</div>
+    <h1>We've moved</h1>
+    <p>Mission Days now lives at <span class="url">mission-days.pages.dev</span>. Same app, still free, no account.</p>
+    <a class="btn primary" href="https://mission-days.pages.dev/">Open the new address</a>
+
+    <section class="card" id="data" hidden>
+      <div class="label">Your data from this address</div>
+      <p>This browser has a mission saved here. Download it, then open the new address and use <b>Settings → Import backup</b> to bring everything over.</p>
+      <button class="btn secondary" id="download">Download my data</button>
+      <p id="done" hidden>Saved. Now open the new address and import it from Settings.</p>
+    </section>
+
+    <p style="margin-top:28px;font-size:13px">Designed &amp; built by Danish Arshid · <a style="color:var(--lime)" href="mailto:danisharshidmantoo@gmail.com?subject=Mission%20Days">Support</a></p>
+  </main>
+  <script>
+    // Data saved by the app at this address (same storage key the app uses).
+    var raw = null;
+    try { raw = localStorage.getItem("gate-air100:v1"); } catch (e) {}
+    if (raw) document.getElementById("data").hidden = false;
+
+    document.getElementById("download").addEventListener("click", async function () {
+      var d = new Date();
+      var pad = function (n) { return String(n).padStart(2, "0"); };
+      var name = "mission-days-backup-" + d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) + ".json";
+      var file = new File([raw], name, { type: "application/json" });
+      if (matchMedia("(pointer: coarse)").matches && navigator.canShare && navigator.canShare({ files: [file] })) {
+        try { await navigator.share({ files: [file], title: "Mission Days backup" }); document.getElementById("done").hidden = false; return; }
+        catch (e) { if (e.name === "AbortError") return; }
+      }
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(file);
+      a.download = name;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      document.getElementById("done").hidden = false;
+    });
+
+    // Retire the old app's offline worker for this path, so this page shows from now on.
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function (regs) {
+        regs.forEach(function (r) { if (r.scope.indexOf("/mission-days/") !== -1) r.unregister(); });
+      }).catch(function () {});
+    }
+  </script>
+</body>
+</html>
